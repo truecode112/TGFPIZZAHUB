@@ -54,7 +54,7 @@ namespace TGFPIZZAHUB.Controllers
 
                 string formatted = FormatOrder(model);
                 await this.HubContext.Clients.All.SendAsync("ReceiveMessage", formatted, jsonString);
-                return Ok(formatted);
+                return Ok("Received an order");
             }
 
             return Ok("Received an order");
@@ -76,18 +76,33 @@ namespace TGFPIZZAHUB.Controllers
             formatted += string.Format("<div><b>{0}</b><br/></div>", model.NewStateObj.Customer.Address1);
             formatted += string.Format("<div><b>{0}</b><br/></div>", model.NewStateObj.Customer.Address2);
 
+            Dictionary<string, string> optionDict = new Dictionary<string, string>();
+
             foreach(var item in model.NewStateObj.Items) {
+                optionDict.Clear();
                 if (item != null) {
                     formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div>{0} {1}</div><div>{2}</div></div>",
                         (int)(float.Parse(item.Quantity)), item.ProductName, item.Price);
                 
-                    formatted += string.Format("<div><b>*** DEALS ***</b></div>");
                     if (item.Options.Count > 0)
                     {
                         foreach(var option in item.Options)
                         {
-                            formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div>{0} {1}</div><div>{2}</div></div>",
-                                (int)(option.Quantity), option.Name, option.Price);
+                            if (optionDict.ContainsKey(option.OptionListName)) {
+                                string? value;
+                                if (optionDict.TryGetValue(option.OptionListName, out value)) {
+                                    value += "," + option.Name;
+                                    optionDict.Remove(option.OptionListName);
+                                    optionDict.Add(option.OptionListName, value);
+                                }
+                            } else {
+                                optionDict.Add(option.OptionListName, option.Name);
+                            }
+                        }
+
+                        foreach(KeyValuePair<string,string> entry in optionDict) {
+                            formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0}: {1}</div></div>",
+                                entry.Key, entry.Value);
                         }
                     }
                 }
@@ -107,6 +122,8 @@ namespace TGFPIZZAHUB.Controllers
                 }
             }
 
+            formatted += string.Format("<br/><div><b>*** DEALS ***</b></div>");
+
             if (model.NewStateObj.Deals.Name != null && model.NewStateObj.Deals.Name != "") {
                 formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div>{0} {1}</div></div>",
                             1, model.NewStateObj.Deals.Name);
@@ -118,8 +135,6 @@ namespace TGFPIZZAHUB.Controllers
             formatted += string.Format("<hr>");
             formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left: 50px;\"><b>Total</b></div><div>{0}</div></div>", model.NewStateObj.Total);
             formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div>You have saved:</div><div>{0} GBP</div></div>", totalDiscount);
-
-
 
             return formatted;
         }
