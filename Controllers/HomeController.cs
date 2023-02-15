@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
+using System.IO.Pipelines;
 using TGFPIZZAHUB.Hubs;
 using TGFPIZZAHUB.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -77,8 +78,11 @@ namespace TGFPIZZAHUB.Controllers
             formatted += string.Format("<div><b>{0}</b><br/></div>", model.NewStateObj.Customer.Address2);
 
             Dictionary<string, string> optionDict = new Dictionary<string, string>();
+            Dictionary<string, int> optionQuantity = new Dictionary<string, int>();
+            Dictionary<string, float> optionprice = new Dictionary<string, float>();
+            string currency = "GBP";
 
-            foreach(var item in model.NewStateObj.Items) {
+            foreach (var item in model.NewStateObj.Items) {
                 optionDict.Clear();
                 if (item != null) {
                     formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div>{0} {1}</div><div>{2}</div></div>",
@@ -88,22 +92,86 @@ namespace TGFPIZZAHUB.Controllers
                     {
                         foreach(var option in item.Options)
                         {
-                            if (optionDict.ContainsKey(option.OptionListName)) {
+                            formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                option.Quantity, option.Name, option.Price);
+
+                            /*if (optionDict.ContainsKey(option.OptionListName)) {
                                 string? value;
                                 if (optionDict.TryGetValue(option.OptionListName, out value)) {
                                     value += "," + option.Name;
                                     optionDict.Remove(option.OptionListName);
                                     optionDict.Add(option.OptionListName, value);
                                 }
+
+                                
                             } else {
                                 optionDict.Add(option.OptionListName, option.Name);
                             }
-                        }
 
-                        foreach(KeyValuePair<string,string> entry in optionDict) {
-                            formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0}: {1}</div></div>",
-                                entry.Key, entry.Value);
+                            if (optionprice.ContainsKey(option.OptionListName))
+                            {
+                                float fPrice;
+                                if (optionprice.TryGetValue(option.OptionListName, out fPrice))
+                                {
+                                    float fNewPrice;
+                                    if (float.TryParse(option.Price.Split(" ")[0], out fNewPrice))
+                                    {
+                                        fPrice += fNewPrice;
+                                        optionprice.Remove(option.OptionListName);
+                                        optionprice.Add(option.OptionListName, fPrice);
+                                    }
+                                } else
+                                {
+                                    string price = option.Price;
+                                    if (price != null)
+                                    {
+                                        if (float.TryParse(price.Split(" ")[0], out fPrice))
+                                        {
+                                            optionprice.Remove(option.OptionListName);
+                                            optionprice.Add(option.OptionListName, fPrice);
+                                        }
+
+                                        string tmpCurrency = price.Split(" ")[1];
+                                        if (tmpCurrency != null) {
+                                            currency = tmpCurrency;
+                                        }
+                                    }
+                                }
+                            } else
+                            {
+                                string price = option.Price;
+                                if (price != null)
+                                {
+                                    float fPrice;
+                                    if (float.TryParse(price.Split(" ")[0], out fPrice))
+                                    {
+                                        optionprice.Add(option.OptionListName, fPrice);
+                                    }
+                                }
+                            }
+
+                            if (optionQuantity.ContainsKey(option.OptionListName))
+                            {
+                                int curQuantity;
+                                if (optionQuantity.TryGetValue(option.OptionListName, out curQuantity))
+                                {
+                                    curQuantity += option.Quantity;
+                                    optionQuantity.Remove(option.OptionListName);
+                                    optionQuantity.Add(option.OptionListName, curQuantity);
+                                }
+                            } else
+                            {
+                                optionQuantity.Add(option.OptionListName, option.Quantity);
+                            }*/
                         }
+                        
+                        /*foreach(KeyValuePair<string,string> entry in optionDict) {
+                            int quantity = optionQuantity[entry.Key];
+                            float price = optionprice[entry.Key];
+
+                            formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                quantity, entry.Key + " : " + entry.Value, price + " " + currency);
+                        }*/
                     }
                 }
             }
@@ -122,9 +190,8 @@ namespace TGFPIZZAHUB.Controllers
                 }
             }
 
-            formatted += string.Format("<br/><div><b>*** DEALS ***</b></div>");
-
             if (model.NewStateObj.Deals.Name != null && model.NewStateObj.Deals.Name != "") {
+                formatted += string.Format("<br/><div><b>*** DEALS ***</b></div>");
                 formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div>{0} {1}</div></div>",
                             1, model.NewStateObj.Deals.Name);
             }
