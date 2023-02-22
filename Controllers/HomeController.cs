@@ -9,6 +9,7 @@ using System.IO.Pipelines;
 using TGFPIZZAHUB.Hubs;
 using TGFPIZZAHUB.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using static TGFPIZZAHUB.Models.HubRiseModel;
 
 namespace TGFPIZZAHUB.Controllers
 {
@@ -84,16 +85,235 @@ namespace TGFPIZZAHUB.Controllers
 
             foreach (var item in model.NewStateObj.Items) {
                 optionDict.Clear();
-                if (item != null) {
-                    formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div>{0} {1}</div><div>{2}</div></div>",
-                        (int)(float.Parse(item.Quantity)), item.ProductName, item.Price);
-                
-                    if (item.Options.Count > 0)
+                foreach (var option in item.Options)
+                {
+                    if (option.Price != null)
                     {
-                        foreach(var option in item.Options)
+                        option.Price = option.Price.Split(" ")[0];  //Remove currency
+                    }
+                }
+
+                if (item != null) {
+                    if (item.SkuRef.Contains("OFFER", StringComparison.OrdinalIgnoreCase))
+                    {
+                        formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div>{0} {1}</div><div>{2}</div></div>",
+                            (int)(float.Parse(item.Quantity)) + " X", item.ProductName, item.Subtotal.Split(" ")[0]);
+
+                        var choiceStart = false;
+                        var choiceNames = "";
+                        var choiceTitle = "";
+                        int choiceQuantity = 0;
+                        var choicePrice = "";
+                        var choiceOPs = "";
+                        foreach (var option in item.Options)
+                        {
+                            if (option != null && option.OptionListName.StartsWith("Choice", StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (choiceStart)
+                                {
+                                    // Print
+                                    if (choiceNames.Length > 0)
+                                    {
+                                        choiceNames = choiceNames.Remove(choiceNames.Length - 1);
+                                    }
+
+                                    if (choiceNames.Trim().Length > 0)
+                                    {
+                                        formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                            choiceQuantity + " X", choiceTitle + "(" + choiceNames + ")", /*choicePrice*/"");
+                                    } else
+                                    {
+                                        formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                            choiceQuantity + " X", choiceTitle, /*choicePrice*/"");
+                                    }
+
+                                    formatted += choiceOPs;
+
+                                    choiceQuantity = 0;
+                                    choiceTitle = option.Name;
+                                    choiceQuantity = option.Quantity;
+                                    choicePrice = option.Price;
+                                    choiceNames = "";
+                                    choiceOPs = "";
+                                } else
+                                {
+                                    choiceStart = true;
+                                    choiceTitle = option.Name;
+                                    choiceQuantity = option.Quantity;
+                                    choicePrice = option.Price;
+                                    choiceNames = "";
+                                    choiceOPs = "";
+                                }
+                            }
+                            else
+                            {
+                                if (choiceStart)
+                                {
+                                    if (option != null && option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        choiceOPs += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:40px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                                    option.Ref.Split("-")[1].Trim() + ":", option.Name, /*option.Price*/"");
+
+                                    } else
+                                    {
+                                        choiceNames += option.Name + ",";
+                                    }
+                                } else
+                                {
+                                    formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                            option.Quantity, option.Name, ""/*option.Price*/);
+                                }
+                            }
+                        }
+
+                        if (choiceNames.Length > 0)
+                        {
+                            choiceNames = choiceNames.Remove(choiceNames.Length - 1);
+                        }
+
+                        if (choiceNames.Trim().Length > 0)
                         {
                             formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
-                                option.Quantity, option.Name, option.Price);
+                                choiceQuantity + " X", choiceTitle + "(" + choiceNames + ")", /*choicePrice*/"");
+                        }
+                        else
+                        {
+                            formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                choiceQuantity + " X", choiceTitle, /*choicePrice*/"");
+                        }
+                        formatted += choiceOPs;
+                        continue;
+                    }
+
+                    var OPRef = "";
+                    if (item.Options.Count > 0)
+                    {
+                        foreach (var option in item.Options)
+                        {
+                            if (option != null && option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
+                            {
+                                OPRef += option.Name + ",";
+                            }
+                        }
+                    }
+
+                    if (OPRef.Length > 0)
+                    {
+                        OPRef = OPRef.Remove(OPRef.Length - 1);
+                    }
+
+                    formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div>{0} {1}</div><div>{2}</div></div>",
+                        (int)(float.Parse(item.Quantity)), item.ProductName, item.Subtotal.Split(" ")[0]);
+
+                    if (item.Options.Count > 0)
+                    {
+                        var plusOptions = "";
+                        var lastSideName = "";
+                        var sideStrings = "";
+                        foreach (var option in item.Options)
+                        {
+                            if (option != null && option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
+                            {
+                                formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                    option.Ref.Split("-")[1].Trim() + ":", option.Name, ""/*option.Price*/);
+                                continue;
+                            }
+
+                            if (option.OptionListName != null && option.OptionListName.Contains("-Topping", StringComparison.OrdinalIgnoreCase) && !option.OptionListName.StartsWith("Remove", StringComparison.OrdinalIgnoreCase))
+                            {
+                                continue;
+                            }
+
+                            if (option != null && !option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
+                            {
+                                
+                                if (option.OptionListName != null && option.OptionListName.StartsWith("Side", StringComparison.OrdinalIgnoreCase)) {
+                                    if (plusOptions.Length > 0)
+                                    {
+                                        plusOptions = plusOptions.Remove(plusOptions.Length - 1);
+                                        formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                                        plusOptions, "", "");
+                                        plusOptions = "";
+                                    }
+                                    var sideName = option.OptionListName.Split("-")[0];
+                                    if (option.Ref.Contains("TOP", StringComparison.OrdinalIgnoreCase)) {
+                                        if (lastSideName == sideName)
+                                        {
+                                            sideStrings += "+" + option.Name + ",";
+                                        } else
+                                        {
+                                            if (lastSideName == "")
+                                            {
+                                                lastSideName = sideName;
+                                                sideStrings = "+" + option.Name + " ,";
+                                            } else
+                                            {
+                                                if (sideStrings.Length > 0)
+                                                {
+                                                    sideStrings = sideStrings.Remove(sideStrings.Length - 1);
+                                                    formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div></div>",
+                                                        lastSideName + ":", sideStrings);
+                                                }
+
+                                                lastSideName = sideName;
+                                                sideStrings = "+" + option.Name + " ,";
+                                            }
+                                        }
+                                    } else
+                                    {
+                                        if (sideStrings.Length > 0)
+                                        {
+                                            sideStrings = sideStrings.Remove(sideStrings.Length - 1);
+                                            formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div></div>",
+                                                lastSideName + ":", sideStrings);
+                                        }
+                                        
+                                        lastSideName = "";
+                                        sideStrings = "";
+                                        formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div></div>",
+                                            sideName + ":", option.Name);
+                                    }
+                                } else
+                                {
+                                    if (sideStrings.Length > 0)
+                                    {
+                                        sideStrings = sideStrings.Remove(sideStrings.Length - 1);
+                                        formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div></div>",
+                                            lastSideName + ":", sideStrings);
+                                    }
+                                    lastSideName = "";
+                                    sideStrings = "";
+
+                                    if ((option.OptionListName.StartsWith("Extra Topping", StringComparison.OrdinalIgnoreCase)) || (option.OptionListName.StartsWith("Topping", StringComparison.OrdinalIgnoreCase) && option.OptionListName.EndsWith("HNH", StringComparison.OrdinalIgnoreCase))
+                                        || (option.Ref.Contains("TOP", StringComparison.OrdinalIgnoreCase) && !option.OptionListName.StartsWith("Remove", StringComparison.OrdinalIgnoreCase)))
+                                    {
+                                        plusOptions += "+" + option.Name + ",";
+                                    } else if (option.OptionListName.StartsWith("Remove", StringComparison.OrdinalIgnoreCase) && option.Ref.Contains("TOP", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        if (plusOptions.Length > 0)
+                                        {
+                                            plusOptions = plusOptions.Remove(plusOptions.Length - 1);
+                                            formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                                            plusOptions, "", "");
+                                            plusOptions = "";
+                                        }
+                                        formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                            "-", option.Name, ""/*option.Price*/);
+                                    } else 
+                                    {
+                                        if (plusOptions.Length > 0)
+                                        {
+                                            plusOptions = plusOptions.Remove(plusOptions.Length - 1);
+                                            formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                                            plusOptions, "", "");
+                                            plusOptions = "";
+                                        }
+                                        formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                            option.Quantity, option.Name, ""/*option.Price*/);
+                                    }
+                                    
+                                }
+                            }
 
                             /*if (optionDict.ContainsKey(option.OptionListName)) {
                                 string? value;
