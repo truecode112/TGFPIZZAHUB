@@ -149,7 +149,11 @@ namespace TGFPIZZAHUB.Controllers
                             {
                                 if (choiceStart)
                                 {
-                                    if (option != null && option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
+                                    if (option.OptionListName.StartsWith("Remove", StringComparison.OrdinalIgnoreCase) && option.Ref.Contains("TOP", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        choiceOPs += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:40px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
+                                            "-", option.Name, ""/*option.Price*/);
+                                    } else if (option != null && option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
                                     {
                                         choiceOPs += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:40px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
                                                     option.Ref.Split("-")[1].Trim() + ":", option.Name, /*option.Price*/"");
