@@ -20,3 +20,15 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.timepicker {
+    font-size: 18px;
+    padding: 0 0 .5em 0;
+    width: 50px;
+    border: none;
+    text-align:center;
+}
+
+textarea:focus, input:focus {
+    outline: none;
+}

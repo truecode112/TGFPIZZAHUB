@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
+﻿using Hanssens.Net;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -15,11 +16,11 @@ namespace TGFPIZZAHUB.Controllers
 {
     public class HomeController : Controller
     {
-        public static string ACCOUNT_ACCESS_TOKEN = "463ddd4b60ada35d4a52055d55a85f53";
-
         private readonly ILogger<HomeController> _logger;
 
         private IHubContext<ChatHub> HubContext { get; set; }
+
+        LocalStorage localStorage = new LocalStorage();
 
         public HomeController(ILogger<HomeController> logger, IHubContext<ChatHub> hubContext)
         {
@@ -47,7 +48,6 @@ namespace TGFPIZZAHUB.Controllers
         public async Task<IActionResult> HubRiseCallback([FromBody] HubRiseModel model)
         {
             var jsonString = JsonConvert.SerializeObject(model);
-            
             //string prettyStr;
             //prettyStr = JToken.Parse(jsonString).ToString(Formatting.Indented);
 
@@ -55,7 +55,44 @@ namespace TGFPIZZAHUB.Controllers
             if (model != null) {
 
                 string formatted = FormatOrder(model);
+
+                string orderSavedData;
+
+                try
+                {
+                    orderSavedData = (string)localStorage.Get("Orders");
+                } catch (Exception e)
+                {
+                    orderSavedData = null;
+                }
+
+                List<Order> orderArray;
+
+                if (orderSavedData!= null)
+                {
+                    orderArray = JsonConvert.DeserializeObject<List<Order>>(orderSavedData);
+                    if (orderArray == null)
+                    {
+                        orderArray = new List<Order>();
+                    }
+                }
+                else
+                {
+                    orderArray = new List<Order>();
+                }
+
+                Order newOrder = new Order
+                {
+                    Formated = formatted,
+                    Json = jsonString,
+                };
+                orderArray.Add(newOrder);
+                var orderArrayString = JsonConvert.SerializeObject(orderArray);
+                localStorage.Store("Orders", orderArrayString);
+                localStorage.Persist();
+
                 await this.HubContext.Clients.All.SendAsync("ReceiveMessage", formatted, jsonString);
+
                 return Ok("Received an order");
             }
 
@@ -149,11 +186,11 @@ namespace TGFPIZZAHUB.Controllers
                             {
                                 if (choiceStart)
                                 {
-                                    if (option.OptionListName.StartsWith("Remove", StringComparison.OrdinalIgnoreCase) && option.Ref.Contains("TOP", StringComparison.OrdinalIgnoreCase))
+                                    if (option.OptionListName.StartsWith("Remove", StringComparison.OrdinalIgnoreCase) && option.Ref != null && option.Ref.Contains("TOP", StringComparison.OrdinalIgnoreCase))
                                     {
                                         choiceOPs += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:40px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
                                             "-", option.Name, ""/*option.Price*/);
-                                    } else if (option != null && option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
+                                    } else if (option != null && option.Ref != null && option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
                                     {
                                         choiceOPs += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:40px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
                                                     option.Ref.Split("-")[1].Trim() + ":", option.Name, /*option.Price*/"");
@@ -194,7 +231,7 @@ namespace TGFPIZZAHUB.Controllers
                     {
                         foreach (var option in item.Options)
                         {
-                            if (option != null && option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
+                            if (option != null && option.Ref != null && option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
                             {
                                 OPRef += option.Name + ",";
                             }
@@ -216,7 +253,7 @@ namespace TGFPIZZAHUB.Controllers
                         var sideStrings = "";
                         foreach (var option in item.Options)
                         {
-                            if (option != null && option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
+                            if (option != null && option.Ref != null && option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
                             {
                                 formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left:20px;\">{0} {1}</div><div style=\"white-space:nowrap;\">{2}</div></div>",
                                     option.Ref.Split("-")[1].Trim() + ":", option.Name, ""/*option.Price*/);
@@ -228,7 +265,7 @@ namespace TGFPIZZAHUB.Controllers
                                 continue;
                             }
 
-                            if (option != null && !option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
+                            if (option != null && option.Ref != null && !option.Ref.StartsWith("OP", StringComparison.OrdinalIgnoreCase))
                             {
                                 
                                 if (option.OptionListName != null && option.OptionListName.StartsWith("Side", StringComparison.OrdinalIgnoreCase)) {
@@ -240,7 +277,7 @@ namespace TGFPIZZAHUB.Controllers
                                         plusOptions = "";
                                     }
                                     var sideName = option.OptionListName.Split("-")[0];
-                                    if (option.Ref.Contains("TOP", StringComparison.OrdinalIgnoreCase)) {
+                                    if (option.Ref != null && option.Ref.Contains("TOP", StringComparison.OrdinalIgnoreCase)) {
                                         if (lastSideName == sideName)
                                         {
                                             sideStrings += "+" + option.Name + ",";
@@ -289,7 +326,7 @@ namespace TGFPIZZAHUB.Controllers
                                     sideStrings = "";
 
                                     if ((option.OptionListName.StartsWith("Extra Topping", StringComparison.OrdinalIgnoreCase)) || (option.OptionListName.StartsWith("Topping", StringComparison.OrdinalIgnoreCase) && option.OptionListName.EndsWith("HNH", StringComparison.OrdinalIgnoreCase))
-                                        || (option.Ref.Contains("TOP", StringComparison.OrdinalIgnoreCase) && !option.OptionListName.StartsWith("Remove", StringComparison.OrdinalIgnoreCase)))
+                                        || (option.Ref != null && option.Ref.Contains("TOP", StringComparison.OrdinalIgnoreCase) && !option.OptionListName.StartsWith("Remove", StringComparison.OrdinalIgnoreCase)))
                                     {
                                         plusOptions += "+" + option.Name + ",";
                                     } else if (option.OptionListName.StartsWith("Remove", StringComparison.OrdinalIgnoreCase) && option.Ref.Contains("TOP", StringComparison.OrdinalIgnoreCase))

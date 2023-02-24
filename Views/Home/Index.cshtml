@@ -1,5 +1,4 @@
-﻿@model HubRiseModel
-@{
+﻿@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -10,8 +9,47 @@
     <p>Order from HubRise will be shown when the order is created</p>
 </div>
 
-<div id="hubriseresponse" name="hubriseresponse" style="width: 500px">
-    
+<div class="modal fade" id="orderModal" tabindex="-1" role="dialog" aria-labelledby="orderModalTitle" aria-hidden="true" data-orderid="" data-locationid="" data-orderdata="" data-confirmtime="">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Order Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onClick="closeModal()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onClick="closeModal()" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="acceptOrder()">Accept</button>
+      </div>
+    </div>
+  </div>
 </div>
+
+<div id="hubriseresponse" class="d-flex align-items-center justify-content-center flex-column" name="hubriseresponse" style="width: 500px">
+    <!--
+        <div class="card w-75 mt-2 flex-row">
+            <div class="ml-3 w-10 flex-column d-flex align-items-center justify-content-center">
+                <h3 class="card-title">16:11</h3>
+                <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" fill="currentColor" class="bi bi-bicycle" viewBox="0 0 16 16">
+                    <path d="M4 4.5a.5.5 0 0 1 .5-.5H6a.5.5 0 0 1 0 1v.5h4.14l.386-1.158A.5.5 0 0 1 11 4h1a.5.5 0 0 1 0 1h-.64l-.311.935.807 1.29a3 3 0 1 1-.848.53l-.508-.812-2.076 3.322A.5.5 0 0 1 8 10.5H5.959a3 3 0 1 1-1.815-3.274L5 5.856V5h-.5a.5.5 0 0 1-.5-.5zm1.5 2.443-.508.814c.5.444.85 1.054.967 1.743h1.139L5.5 6.943zM8 9.057 9.598 6.5H6.402L8 9.057zM4.937 9.5a1.997 1.997 0 0 0-.487-.877l-.548.877h1.035zM3.603 8.092A2 2 0 1 0 4.937 10.5H3a.5.5 0 0 1-.424-.765l1.027-1.643zm7.947.53a2 2 0 1 0 .848-.53l1.026 1.643a.5.5 0 1 1-.848.53L11.55 8.623z" />
+                </svg>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title mb-1 mt-1">item.HubRise.Customer.FirstName</h5>
+                <h6 class="card-title mt-1 mb-1">Test name</h6>
+                <p class="card-text">2 Products(45.00 GBP)</p>
+                <div class="flex-row d-flex">
+                    <button class="btn btn-primary mr-2">View</button>
+                    <button class="btn btn-success">Accept</button>
+                </div>
+            </div>
+        </div>
+    -->
+</div>
+
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 <script src="~/js/hubriseclient.js"></script>
