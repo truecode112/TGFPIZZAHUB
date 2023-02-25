@@ -17,7 +17,7 @@ namespace TGFPIZZAHUB.Hubs
             AcceptOrderModel? orderData = JsonConvert.DeserializeObject<AcceptOrderModel>(postData);
             if (orderData != null)
             {
-                var baseUrl = string.Format("https://api.hubrise.com/v1/location/{0}/orders/{1}", orderData.location_id, orderData.order_id);
+                var baseUrl = string.Format("https://api.hubrise.com/v1/location/orders/{0}", orderData.order_id);
                 var options = new RestClientOptions(baseUrl) {
                     RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true
                 };
