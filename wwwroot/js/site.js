@@ -8,10 +8,10 @@ function viewOrder(e, data, order_id, location_id, expected_time) {
         return;
     var expectTime = new Date(expected_time);
     //console.log($("#t-input-" + order_id).val());
-    $("#orderModal").attr('data-confirmtime', expectTime);
-    $("#orderModal").attr('data-orderid', order_id);
-    $("#orderModal").attr('data-locationid', location_id);
-    $("#orderModal").attr('data-orderdata', data);
+    $("#orderData").val(data);
+    $("#orderId").val(order_id);
+    $("#orderLocationId").val(location_id);
+    $("#confirmtime").val(expected_time);
     $("#orderModal").modal("show");
 }
 
@@ -21,15 +21,13 @@ function closeModal() {
 
 $('#orderModal').on('show.bs.modal', function (event) {
     var modal = $(this);
-    var order_id = modal.data('orderid');
-    var location_id = modal.data('locationid');
-    var order_data = modal.data('orderdata');
-    var expect_time = modal.data('confirmtime');
-    modal.find("#confirmtime").val(expect_time);
+    var order_id = $('#orderid').val();
+    var location_id = $('#locationid').val();
+    var order_data = $("#orderData").val();
+    var expect_time = $('#confirmtime').val();
     var decoded = atob(order_data);
     modal.find('.modal-body').prepend(decoded);
     var expect_date = new Date(expect_time);
-    console.log(expect_date);
     modal.find('#delivery_time').text(expect_date.getHours() + ":" + expect_date.getMinutes());
     /*var button = $(event.relatedTarget) // Button that triggered the modal
     var recipient = button.data('whatever') // Extract info from data-* attributes

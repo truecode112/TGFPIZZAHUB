@@ -15,7 +15,6 @@ connection.on("ReceiveMessage", function (formattedData, rawData) {
 
 function processOrder(formattedData, rawData) {
     try {
-        console.log(typeof formattedData);
         var encoded = btoa(unescape(encodeURIComponent(formattedData)))
         var order = JSON.parse(rawData);
         var expectTime;
@@ -25,7 +24,7 @@ function processOrder(formattedData, rawData) {
             expectTime = new Date();
         }
 
-        var orderCard = `<summary class="card mt-2 flex-row" onClick="viewOrder(event, '${encoded}', '${order.id}', '${order.location_id}', '${expectTime}')" data-order-id="${order.id}"> 
+        var orderCard = `<summary class="card mt-2 flex-row" onClick="viewOrder(event, '${encoded}', '${order.order_id}', '${order.location_id}', '${expectTime}')"> 
         <div class="ml-3 mr-3 w-10 flex-column d-flex align-items-center justify-content-center">
             <p class="card-title mt-0 mb-0 font-weight-bold" >${expectTime.getHours()}:${expectTime.getMinutes()}</p> 
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-bicycle" viewBox="0 0 16 16"> 
@@ -59,6 +58,7 @@ function processOrder(formattedData, rawData) {
 connection.on("OldMessages", function (oldMessages) {
     
     try {
+        console.log(oldMessages);
         var orderArray = JSON.parse(oldMessages);
         if (orderArray != null && orderArray != undefined) {
             orderArray.forEach(order => {
@@ -126,9 +126,9 @@ function changeDelivery(action) {
 
 function acceptOrder() {
     console.log('acceptOrder');
-    var modal = $('#orderModal');
-    var order_id = modal.data('orderid');
-    var location_id = modal.data('locationid');
+    var modal = $('#orderModal').val();
+    var order_id = $('#orderId').val();
+    var location_id = $('#orderLocationId').val();
     var expect_time = $("#confirmtime").val();
     console.log(expect_time);
 

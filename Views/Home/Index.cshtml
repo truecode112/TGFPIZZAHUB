@@ -9,7 +9,7 @@
     <p>Order from HubRise will be shown when the order is created</p>
 </div>
 
-<div class="modal fade" id="orderModal" tabindex="-1" role="dialog" aria-labelledby="orderModalTitle" aria-hidden="true" data-orderid="" data-locationid="" data-orderdata="" data-confirmtime="">
+<div class="modal fade" id="orderModal" tabindex="-1" role="dialog" aria-labelledby="orderModalTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -22,6 +22,9 @@
         
       </div>
       <input type="hidden" name="confirmtime" id="confirmtime" value=""/>
+      <input type="hidden" name="orderData" id="orderData" value="" />
+      <input type="hidden" name="orderId" id="orderId" value="" />
+      <input type="hidden" name="orderLocationId" id="orderLocationId" value=""/>
       <div class="d-flex mt-2 mb-2 justify-content-center">
             <button type="button" onClick="changeDelivery('minus')" class="p-0 btn btn-light" style="width:100px;border-color: cornflowerblue;color:#0000ff;background: whitesmoke;"><span>&#8211;</span><br/>10 MIN</button>
             <div class="ml-4 mr-4 w-10 flex-column d-flex align-items-center justify-content-center">
