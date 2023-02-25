@@ -26,6 +26,7 @@ namespace TGFPIZZAHUB.Controllers
         {
             _logger = logger;
             HubContext = hubContext;
+
         }
 
         /*public IActionResult Index(HubRiseModel model)
@@ -92,7 +93,6 @@ namespace TGFPIZZAHUB.Controllers
                 localStorage.Persist();
 
                 await this.HubContext.Clients.All.SendAsync("ReceiveMessage", formatted, jsonString);
-
                 return Ok("Received an order");
             }
 
