@@ -131,7 +131,7 @@ function acceptOrder() {
     console.log(expect_time);
 
     var postData = {
-        "confirmed_time": expect_time,
+        "confirmed_time": new Date(expect_time).toISOString(),
         "location_id": location_id,
         "order_id": order_id
     };
