@@ -82,9 +82,11 @@ connection.on("ReceiveOrderAccept", function (result) {
         });
         closeModal();
     } else {
+        console.log(typeof result);
+
         $.toast({
             heading: 'Error',
-            text: 'Accept order failed',
+            text: JSON.parse(result).message,
             showHideTransition: 'fade',
             position: 'top-right',
             icon: 'error'

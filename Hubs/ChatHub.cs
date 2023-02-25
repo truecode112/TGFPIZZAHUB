@@ -38,7 +38,7 @@ namespace TGFPIZZAHUB.Hubs
                     await Clients.Client(Context.ConnectionId).SendAsync("ReceiveOrderAccept", "OK");
                 } else
                 {
-                    await Clients.Client(Context.ConnectionId).SendAsync("ReceiveOrderAccept", "Fail");
+                    await Clients.Client(Context.ConnectionId).SendAsync("ReceiveOrderAccept", response.Content);
                 }
             }
             Console.WriteLine(postData);
