@@ -15,8 +15,10 @@ connection.on("ReceiveMessage", function (formattedData, rawData) {
 
 function processOrder(formattedData, rawData) {
     try {
+        
         var encoded = btoa(unescape(encodeURIComponent(formattedData)))
         var order = JSON.parse(rawData);
+
         var expectTime;
         if (order.new_state.expected_time != null) {
             expectTime = new Date(order.new_state.expected_time);
@@ -24,7 +26,7 @@ function processOrder(formattedData, rawData) {
             expectTime = new Date();
         }
 
-        var orderCard = `<summary class="card mt-2 flex-row" onClick="viewOrder(event, '${encoded}', '${order.order_id}', '${order.location_id}', '${expectTime}')"> 
+        var orderCard = `<summary class="card mt-2 flex-row" id="${order.order_id}" onClick="viewOrder(event, '${encoded}', '${order.order_id}', '${order.location_id}', '${expectTime}')"> 
         <div class="ml-3 mr-3 w-10 flex-column d-flex align-items-center justify-content-center">
             <p class="card-title mt-0 mb-0 font-weight-bold" >${expectTime.getHours()}:${expectTime.getMinutes()}</p> 
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-bicycle" viewBox="0 0 16 16"> 
@@ -58,11 +60,11 @@ function processOrder(formattedData, rawData) {
 connection.on("OldMessages", function (oldMessages) {
     
     try {
-        console.log(oldMessages);
+        //console.log(oldMessages);
         var orderArray = JSON.parse(oldMessages);
         if (orderArray != null && orderArray != undefined) {
             orderArray.forEach(order => {
-                processOrder(order.Formated, order.Json);
+                processOrder(order.formatted, order.json);
             });
         }
     }
@@ -71,7 +73,7 @@ connection.on("OldMessages", function (oldMessages) {
     }
 });
 
-connection.on("ReceiveOrderAccept", function (result) {
+connection.on("ReceiveOrderAccept", function (result, orderId) {
     if (result == "OK") {
         $.toast({
             heading: 'Success',
@@ -80,10 +82,9 @@ connection.on("ReceiveOrderAccept", function (result) {
             position: 'top-right',
             icon: 'success'
         });
+        $("#" + orderId).remove();
         closeModal();
     } else {
-        console.log(typeof result);
-
         $.toast({
             heading: 'Error',
             text: JSON.parse(result).message,
@@ -111,7 +112,6 @@ connection.onclose(async () => {
 
 
 function changeDelivery(action) {
-    console.log('changeDelivery', action);
     var modal = $('#orderModal');
     var expect_time = $("#confirmtime").val();
     var expect_date = new Date(expect_time);
@@ -125,12 +125,10 @@ function changeDelivery(action) {
 }
 
 function acceptOrder() {
-    console.log('acceptOrder');
     var modal = $('#orderModal').val();
     var order_id = $('#orderId').val();
     var location_id = $('#orderLocationId').val();
     var expect_time = $("#confirmtime").val();
-    console.log(expect_time);
 
     var postData = {
         "confirmed_time": new Date(expect_time).toISOString(),

@@ -12,8 +12,6 @@ namespace TGFPIZZAHUB.Hubs
     {
         public async Task SendData(string postData)
         {
-            
-
             AcceptOrderModel? orderData = JsonConvert.DeserializeObject<AcceptOrderModel>(postData);
             if (orderData != null)
             {
@@ -35,23 +33,74 @@ namespace TGFPIZZAHUB.Hubs
 
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    await Clients.Client(Context.ConnectionId).SendAsync("ReceiveOrderAccept", "OK");
+                    string curPath = Directory.GetCurrentDirectory();
+                    string target = Path.Combine(curPath, "Orders");
+                    if (Directory.Exists(target))
+                    {
+                        File.Delete(Path.Combine(target, orderData.order_id + ".data"));
+                    }
+                        /*
+                        string? orderSavedData = null;
+                        try
+                        {
+                            orderSavedData = (string)localStorage.Get("Orders");
+                        }
+                        catch (Exception e)
+                        {
+                        }
+
+                        if (orderSavedData != null)
+                        {
+                            List<Order>? orderArray;
+                            orderArray = JsonConvert.DeserializeObject<List<Order>>(orderSavedData);
+                            if (orderArray != null)
+                            {
+                                Order? findOrder = orderArray.Find(order => (order.OrderId == orderData.order_id && order.IsOrdered == false));
+                                if (findOrder != null)
+                                {
+                                    findOrder.IsOrdered = true;
+                                    var orderArrayString = JsonConvert.SerializeObject(orderArray);
+                                    localStorage.Store("Orders", orderArrayString);
+                                    localStorage.Persist();
+                                }
+                            }
+                        }*/
+                        await Clients.Client(Context.ConnectionId).SendAsync("ReceiveOrderAccept", "OK", orderData.order_id);
                 } else
                 {
-                    await Clients.Client(Context.ConnectionId).SendAsync("ReceiveOrderAccept", response.Content);
+                    await Clients.Client(Context.ConnectionId).SendAsync("ReceiveOrderAccept", response.Content, orderData.order_id);
                 }
             }
             Console.WriteLine(postData);
         }
 
-        LocalStorage localStorage = new LocalStorage();
-
         public override async Task OnConnectedAsync()
         {
             string connectionId = Context.ConnectionId;
-            string? orderSavedData = null;
+            //string? orderSavedData = null;
             await base.OnConnectedAsync();
 
+            string curPath = Directory.GetCurrentDirectory();
+            string target = Path.Combine(curPath, "Orders");
+            if (Directory.Exists(target))
+            {
+                DirectoryInfo d = new DirectoryInfo(target);
+                List<JObject>? orderArray = new List<JObject>();
+                foreach (var file in d.GetFiles("*.data"))
+                {
+                    string orderString = File.ReadAllText(file.FullName);
+                    if (orderString != null)
+                    {
+                        var orderObj = JsonConvert.DeserializeObject<JObject>(orderString);
+                        if (orderObj != null) {
+                            orderArray.Add(orderObj);
+                        }
+                    }
+                }
+                await Clients.Client(connectionId).SendAsync("OldMessages", JsonConvert.SerializeObject(orderArray));
+            }
+
+            /*
             try
             {
                 orderSavedData = (string)localStorage.Get("Orders");
@@ -62,8 +111,18 @@ namespace TGFPIZZAHUB.Hubs
 
             if (orderSavedData != null)
             {
-                await Clients.Client(connectionId).SendAsync("OldMessages", orderSavedData);
-            }
+                List<Order>? orderArray;
+                List<Order>? unAcceptArray;
+                orderArray = JsonConvert.DeserializeObject<List<Order>>(orderSavedData);
+                if (orderArray != null)
+                {
+                    unAcceptArray = orderArray.FindAll(order => (order.IsOrdered == false || order.IsOrdered == null));
+                    if (unAcceptArray != null)
+                    {
+                        await Clients.Client(connectionId).SendAsync("OldMessages", JsonConvert.SerializeObject(unAcceptArray));
+                    }
+                }
+            }*/
         }
     }
 }

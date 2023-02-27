@@ -11,6 +11,7 @@ using TGFPIZZAHUB.Hubs;
 using TGFPIZZAHUB.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static TGFPIZZAHUB.Models.HubRiseModel;
+using System.IO;
 
 namespace TGFPIZZAHUB.Controllers
 {
@@ -57,6 +58,8 @@ namespace TGFPIZZAHUB.Controllers
 
                 string formatted = FormatOrder(model);
 
+                saveOrderToFile(model.OrderId, formatted, jsonString);
+                /*
                 string orderSavedData;
 
                 try
@@ -86,17 +89,43 @@ namespace TGFPIZZAHUB.Controllers
                 {
                     Formated = formatted,
                     Json = jsonString,
+                    IsOrdered = false,
+                    OrderId = model.OrderId
                 };
                 orderArray.Add(newOrder);
                 var orderArrayString = JsonConvert.SerializeObject(orderArray);
                 localStorage.Store("Orders", orderArrayString);
-                localStorage.Persist();
+                localStorage.Persist();*/
 
                 await this.HubContext.Clients.All.SendAsync("ReceiveMessage", formatted, jsonString);
                 return Ok("Received an order");
             }
 
             return Ok("Received an order");
+        }
+
+        public async void saveOrderToFile(string orderId, string formattedString, string jsonString)
+        {
+            try
+            {
+                string curPath = Directory.GetCurrentDirectory();
+                string target = Path.Combine(curPath, "Orders");
+                if (!Directory.Exists(target))
+                {
+                    Directory.CreateDirectory(target);
+                }
+
+                JObject jsonObj = new JObject();
+                jsonObj.Add("formatted", formattedString);
+                jsonObj.Add("json", jsonString);
+                string orderString = JsonConvert.SerializeObject(jsonObj);
+                using StreamWriter file = new(Path.Combine(target, orderId + ".data"));
+                await file.WriteAsync(orderString);
+            }
+            catch(Exception e)
+            {
+                Console.Error.WriteLine(e.Message);
+            }
         }
 
         private string FormatOrder(HubRiseModel model)
