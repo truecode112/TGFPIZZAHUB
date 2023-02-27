@@ -42,8 +42,8 @@ function processOrder(formattedData, rawData) {
             </div> 
             <div class=""> 
                 <h6 class="card-title mb-0 mt-1">${order.new_state.customer.address_1 == null || typeof order.new_state.customer.address_1 != "string" ? "No address" : order.new_state.customer.address_1} ${order.new_state.customer.address_2 == null ? "" : order.new_state.customer.address_2}</h6> 
-                <p class="mt-0 mb-0" style="font-size:13px;">${order.new_state.customer.first_name} ${order.new_state.customer.last_name}</p> 
-                <p class="card-text mt-0 mb-1" style="font-size:13px;">${order.new_state.items.length} Product${order.new_state.items.length > 1 ? "s" : ""} (${order.new_state.total})</p> 
+                <p class="mt-0 mb-0" style="font-size:10px;">${order.new_state.customer.first_name} ${order.new_state.customer.last_name}</p> 
+                <p class="card-text mt-0 mb-1" style="font-size:10px;">${order.new_state.items.length} Product${order.new_state.items.length > 1 ? "s" : ""} (${order.new_state.total})</p> 
                 <input type="hidden" name="order_id" value="${order.id}"/> 
             </div> 
         </summary>`;
