@@ -32,7 +32,7 @@ function processOrder(formattedData, rawData) {
             type = order.new_state.service_type_ref.split("-")[1].toLowerCase();
         }
 
-        var orderCard = `<summary class="card mt-2 flex-row" id="${order.order_id}" onClick="viewOrder(event, '${encoded}', '${order.order_id}', '${order.location_id}', '${expectTime}')"> 
+        var orderCard = `<summary class="card mt-2 flex-row" id="${order.order_id}" onClick="viewOrder(event, '${encoded}', '${order.order_id}', '${order.location_id}', '${expectTime}', '${order.new_state.service_type_ref}', '${order.new_state.service_type}')"> 
             <div class="ml-2 w-10 flex-column d-flex align-items-center justify-content-center">
                 <img src="${company == "ubereat" ? "/imgs/ubereats.png" : ( company == "takeaway" ? "/imgs/takeaway.png" : "/imgs/justeat.png")}" width="48px" height="48px" />
             </div>
