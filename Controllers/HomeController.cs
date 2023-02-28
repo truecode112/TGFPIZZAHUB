@@ -58,7 +58,7 @@ namespace TGFPIZZAHUB.Controllers
 
                 string formatted = FormatOrder(model);
 
-                saveOrderToFile(model.OrderId, formatted, jsonString);
+                saveOrderToFile(model.OrderId, model.NewStateObj.ExpectedTime, formatted, jsonString);
                 /*
                 string orderSavedData;
 
@@ -104,7 +104,7 @@ namespace TGFPIZZAHUB.Controllers
             return Ok("Received an order");
         }
 
-        public async void saveOrderToFile(string orderId, string formattedString, string jsonString)
+        public async void saveOrderToFile(string orderId, DateTime orderExpectTime, string formattedString, string jsonString)
         {
             try
             {
@@ -115,9 +115,13 @@ namespace TGFPIZZAHUB.Controllers
                     Directory.CreateDirectory(target);
                 }
 
-                JObject jsonObj = new JObject();
-                jsonObj.Add("formatted", formattedString);
-                jsonObj.Add("json", jsonString);
+                Order jsonObj = new()
+                {
+                    OrderId = orderId,
+                    Formatted = formattedString,
+                    Json = jsonString,
+                    ExpectTime = orderExpectTime
+                };
                 string orderString = JsonConvert.SerializeObject(jsonObj);
                 using StreamWriter file = new(Path.Combine(target, orderId + ".data"));
                 await file.WriteAsync(orderString);

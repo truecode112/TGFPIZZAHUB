@@ -85,19 +85,24 @@ namespace TGFPIZZAHUB.Hubs
             if (Directory.Exists(target))
             {
                 DirectoryInfo d = new DirectoryInfo(target);
-                List<JObject>? orderArray = new List<JObject>();
+                List<Order>? orderArray = new List<Order>();
                 foreach (var file in d.GetFiles("*.data"))
                 {
                     string orderString = File.ReadAllText(file.FullName);
                     if (orderString != null)
                     {
-                        var orderObj = JsonConvert.DeserializeObject<JObject>(orderString);
+                        var orderObj = JsonConvert.DeserializeObject<Order>(orderString);
                         if (orderObj != null) {
                             orderArray.Add(orderObj);
                         }
                     }
                 }
-                await Clients.Client(connectionId).SendAsync("OldMessages", JsonConvert.SerializeObject(orderArray));
+
+                var qry = from p in orderArray
+                          orderby p.ExpectTime
+                          select p;
+
+                await Clients.Client(connectionId).SendAsync("OldMessages", JsonConvert.SerializeObject(qry));
             }
 
             /*

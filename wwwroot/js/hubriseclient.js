@@ -71,7 +71,7 @@ connection.on("OldMessages", function (oldMessages) {
         var orderArray = JSON.parse(oldMessages);
         if (orderArray != null && orderArray != undefined) {
             orderArray.forEach(order => {
-                processOrder(order.formatted, order.json);
+                processOrder(order.Formatted, order.Json);
             });
         }
     }
