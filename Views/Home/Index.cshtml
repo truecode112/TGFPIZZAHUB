@@ -23,7 +23,7 @@
       <input type="hidden" name="serviceTypeRef" id="serviceTypeRef" value="" />
       <input type="hidden" name="serviceType" id="serviceType" value="" />
       <input type="hidden" name="isAccepted" id="isAccepted" value="" />
-      <div class="d-flex mt-2 mb-2 justify-content-center" id="time_spin">
+      <div class="mt-2 mb-2 justify-content-center" id="time_spin" style="display:flex;">
             <button type="button" onClick="changeDelivery('minus')" class="p-0 btn btn-light" style="width:100px;border-color: cornflowerblue;color:#0000ff;background: whitesmoke;"><span>&#8211;</span><br/>10 MIN</button>
             <div class="ml-4 mr-4 w-10 flex-column d-flex align-items-center justify-content-center">
                 <p class="card-title mt-0 mb-0 font-weight-bold" name="service_type" id="service_type"></p> 
@@ -32,8 +32,8 @@
                     <img width="28px" height="28px" id="service_type_ref_img" />
                 </div>
             </div>
-                <button type="button" onClick="changeDelivery('plus')" class="p-0 btn btn-light" style="width:100px;border-color: cornflowerblue;color:#0000ff;background: whitesmoke;"><span>&#43;</span><br />10 MIN</button>
-        </div>
+            <button type="button" onClick="changeDelivery('plus')" class="p-0 btn btn-light" style="width:100px;border-color: cornflowerblue;color:#0000ff;background: whitesmoke;"><span>&#43;</span><br />10 MIN</button>
+      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="closeButton" onClick="closeModal()" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" id="confirmButton" onclick="changeOrderStatus('confirmed')">Confirm</button>
