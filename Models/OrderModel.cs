@@ -11,5 +11,6 @@
         public string? Formatted { get; set; }
         public string? Json{ get; set; }
         public DateTime? ExpectTime{ get; set; }
+        public bool? IsAccepted { get; set; }
     }
 }

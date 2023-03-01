@@ -5,15 +5,9 @@ var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 connection.on("ReceiveMessage", function (formattedData, rawData) {
     console.log(rawData);
     processOrder(formattedData, rawData);
-    // data[0] = ''; data[data.length - 1] = '';
-    // document.getElementById("hubriseresponse").innerHTML = new;
-    // We can assign user-supplied strings to an element's textContent because it
-    // is not interpreted as markup. If you're assigning in any other way, you 
-    // should be aware of possible script injection concerns.
-    //li.textContent = `${user} says ${message}`;
 });
 
-function processOrder(formattedData, rawData) {
+function processOrder(formattedData, rawData, isAccepted) {
     try {
         
         var encoded = btoa(unescape(encodeURIComponent(formattedData)))
@@ -44,7 +38,8 @@ function processOrder(formattedData, rawData) {
                 <h6 class="card-title mb-0 mt-1">${order.new_state.customer.address_1 == null || typeof order.new_state.customer.address_1 != "string" ? "No address" : order.new_state.customer.address_1} ${order.new_state.customer.address_2 == null ? "" : order.new_state.customer.address_2}</h6> 
                 <p class="mt-0 mb-0" style="font-size:10px;">${order.new_state.customer.first_name} ${order.new_state.customer.last_name}</p> 
                 <p class="card-text mt-0 mb-1" style="font-size:10px;">${order.new_state.items.length} Product${order.new_state.items.length > 1 ? "s" : ""} (${order.new_state.total})</p> 
-                <input type="hidden" name="order_id" value="${order.id}"/> 
+                <input type="hidden" id="order_id" name="order_id" value="${order.id}"/> 
+                <input type="hidden" id="${order.order_id}_status" value="${isAccepted}" />
             </div> 
         </summary>`;
     }
@@ -52,7 +47,12 @@ function processOrder(formattedData, rawData) {
         console.log("err", err);
     }
 
-    document.getElementById("hubriseresponse").innerHTML += orderCard;//new DOMParser().parseFromString(data, 'text/xml').body;
+    if (isAccepted) {
+        document.getElementById("acceptedorders").innerHTML += orderCard;
+    } else {
+        document.getElementById("pendingorders").innerHTML += orderCard;//new DOMParser().parseFromString(data, 'text/xml').body;
+    }
+    
     $(document).ready(function () {
         $('.timepicker').timepicker({
             timeFormat: 'H:mm',
@@ -64,14 +64,14 @@ function processOrder(formattedData, rawData) {
     });
 }
 
-connection.on("OldMessages", function (oldMessages) {
+connection.on("CurrentOrders", function (currentOrders) {
     
     try {
         //console.log(oldMessages);
-        var orderArray = JSON.parse(oldMessages);
+        var orderArray = JSON.parse(currentOrders);
         if (orderArray != null && orderArray != undefined) {
             orderArray.forEach(order => {
-                processOrder(order.Formatted, order.Json);
+                processOrder(order.Formatted, order.Json, order.IsAccepted);
             });
         }
     }
@@ -80,8 +80,9 @@ connection.on("OldMessages", function (oldMessages) {
     }
 });
 
-connection.on("ReceiveOrderAccept", function (result, orderId) {
-    if (result == "OK") {
+connection.on("ChangeOrderStatusOK", function (status, orderId) {
+    $("#savingModal").modal("hide");
+    if (status == "accepted") {
         $.toast({
             heading: 'Success',
             text: 'Order accepted successfully!',
@@ -89,18 +90,35 @@ connection.on("ReceiveOrderAccept", function (result, orderId) {
             position: 'top-right',
             icon: 'success'
         });
+        $("#" + orderId + "_status").val('true');
+        var orderHTML = $("#" + orderId).prop("outerHTML");
+        console.log(orderHTML);
         $("#" + orderId).remove();
-        closeModal();
+        document.getElementById("acceptedorders").innerHTML += orderHTML;
     } else {
         $.toast({
-            heading: 'Error',
-            text: JSON.parse(result).message,
+            heading: 'Success',
+            text: 'Order rejected successfully!',
             showHideTransition: 'fade',
             position: 'top-right',
-            icon: 'error'
-        })
+            icon: 'success'
+        });
+        $("#" + orderId).remove();
     }
+    closeModal();
 });
+
+connection.on("ChangeOrderStatusFail", function (error, orderId) {
+    $("#savingModal").modal("hide");
+    $.toast({
+        heading: 'Error',
+        text: JSON.parse(error).message,
+        showHideTransition: 'fade',
+        position: 'top-right',
+        icon: 'error'
+    })
+});
+
 
 async function start() {
     try {
@@ -131,7 +149,9 @@ function changeDelivery(action) {
     modal.find('#delivery_time').text(expect_date.getHours() + ":" + expect_date.getMinutes());
 }
 
-function acceptOrder() {
+function changeOrderStatus(status) {
+    $("#savingModal").modal("show");
+
     var modal = $('#orderModal').val();
     var order_id = $('#orderId').val();
     var location_id = $('#orderLocationId').val();
@@ -140,7 +160,8 @@ function acceptOrder() {
     var postData = {
         "confirmed_time": new Date(expect_time).toISOString(),
         "location_id": location_id,
-        "order_id": order_id
+        "order_id": order_id,
+        "status": status
     };
 
     connection.invoke('SendData', JSON.stringify(postData)).catch(function (err) {

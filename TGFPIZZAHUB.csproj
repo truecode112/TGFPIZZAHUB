@@ -12,4 +12,11 @@
     <PackageReference Include="RestSharp" Version="108.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="WinPizzaData">
+      <HintPath>TGFLibrary\WinPizzaData.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+
 </Project>

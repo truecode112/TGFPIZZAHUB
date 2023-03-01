@@ -38,19 +38,19 @@ textarea:focus, input:focus {
     // override inline padding-right added from js
 }
 
-.modal .modal-dialog {
+.modal .order-modal-dialog {
     width: 100%;
     max-width: none;
     height: 100%;
     margin: 0;
 }
 
-.modal .modal-content {
+.modal .order-modal-content {
     height: 100%;
     border: 0;
     border-radius: 0;
 }
 
-.modal .modal-body {
+.modal .order-modal-body {
     overflow-y: auto;
 }

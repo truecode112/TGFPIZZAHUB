@@ -120,7 +120,8 @@ namespace TGFPIZZAHUB.Controllers
                     OrderId = orderId,
                     Formatted = formattedString,
                     Json = jsonString,
-                    ExpectTime = orderExpectTime
+                    ExpectTime = orderExpectTime,
+                    IsAccepted = false
                 };
                 string orderString = JsonConvert.SerializeObject(jsonObj);
                 using StreamWriter file = new(Path.Combine(target, orderId + ".data"));
