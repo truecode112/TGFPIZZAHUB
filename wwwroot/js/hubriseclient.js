@@ -81,7 +81,9 @@ connection.on("CurrentOrders", function (currentOrders) {
 });
 
 connection.on("ChangeOrderStatusOK", function (status, orderId) {
-    $("#savingModal").modal("hide");
+    if (status != "confirmed")
+        $("#savingModal").modal("hide");
+
     if (status == "accepted") {
         $.toast({
             heading: 'Success',
@@ -95,6 +97,15 @@ connection.on("ChangeOrderStatusOK", function (status, orderId) {
         console.log(orderHTML);
         $("#" + orderId).remove();
         document.getElementById("acceptedorders").innerHTML += orderHTML;
+    } else if (status == "confirmed") {
+        $.toast({
+            heading: 'Success',
+            text: 'Order confirmed successfully!',
+            showHideTransition: 'fade',
+            position: 'top-right',
+            icon: 'success'
+        });
+        $("#" + orderId).remove();
     } else {
         $.toast({
             heading: 'Success',
@@ -150,7 +161,8 @@ function changeDelivery(action) {
 }
 
 function changeOrderStatus(status) {
-    $("#savingModal").modal("show");
+    if (status != "confirmed")
+        $("#savingModal").modal("show");
 
     var modal = $('#orderModal').val();
     var order_id = $('#orderId').val();

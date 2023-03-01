@@ -23,7 +23,7 @@
       <input type="hidden" name="serviceTypeRef" id="serviceTypeRef" value="" />
       <input type="hidden" name="serviceType" id="serviceType" value="" />
       <input type="hidden" name="isAccepted" id="isAccepted" value="" />
-      <div class="d-flex mt-2 mb-2 justify-content-center">
+      <div class="d-flex mt-2 mb-2 justify-content-center" id="time_spin">
             <button type="button" onClick="changeDelivery('minus')" class="p-0 btn btn-light" style="width:100px;border-color: cornflowerblue;color:#0000ff;background: whitesmoke;"><span>&#8211;</span><br/>10 MIN</button>
             <div class="ml-4 mr-4 w-10 flex-column d-flex align-items-center justify-content-center">
                 <p class="card-title mt-0 mb-0 font-weight-bold" name="service_type" id="service_type"></p> 
@@ -36,6 +36,7 @@
         </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="closeButton" onClick="closeModal()" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="confirmButton" onclick="changeOrderStatus('confirmed')">Confirm</button>
         <button type="button" class="btn btn-secondary" id="rejectButton" onClick="changeOrderStatus('rejected')" data-dismiss="modal">Reject</button>
         <button type="button" class="btn btn-primary" id="acceptButton" onclick="changeOrderStatus('accepted')">Accept</button>
       </div>
@@ -54,10 +55,16 @@
 </div>
 
 <div class="d-flex flex-row" style="width:100%">
-    <div id="pendingorders" class="display-grid" name="pendingorders" style="display:grid;width:100%;grid-template-columns:repeat(1, 250px);grid-column-gap:15px;grid-row-gap:5px;">
+    <div style="width:100%">
+        <h4>New</h4>
+        <div id="pendingorders" class="display-grid mt-1" name="pendingorders" style="display:grid;width:100%;grid-template-columns:repeat(1, 250px);grid-column-gap:15px;grid-row-gap:5px;">
+        </div>
     </div>
 
-    <div id="acceptedorders" class="display-grid" name="acceptedorders" style="display:grid;width:100%;grid-template-columns:repeat(1, 250px);grid-column-gap:15px;grid-row-gap:5px;">
+    <div style="width:100%">
+        <h4>Accepted</h4>
+        <div id="acceptedorders" class="display-grid" name="acceptedorders" style="display:grid;width:100%;grid-template-columns:repeat(1, 250px);grid-column-gap:15px;grid-row-gap:5px;">
+        </div>
     </div>
 </div>
 

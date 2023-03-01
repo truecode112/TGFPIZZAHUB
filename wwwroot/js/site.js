@@ -47,12 +47,16 @@ $('#orderModal').on('show.bs.modal', function (event) {
     modal.find('#service_type_ref_img').attr('src', (type == "delivery" ? "/imgs/delivery.png" : "/imgs/collection.png"));
     if (is_accepted == "true") {
         modal.find('#closeButton').show();
+        modal.find('#confirmButton').show();
         modal.find('#rejectButton').hide();
         modal.find('#acceptButton').hide();
+        modal.find('#time_spin').hide();
     } else {
         modal.find('#closeButton').hide();
+        modal.find('#confirmButton').hide();
         modal.find('#rejectButton').show();
         modal.find('#acceptButton').show();
+        modal.find('#time_spin').show();
     }
 })
 
