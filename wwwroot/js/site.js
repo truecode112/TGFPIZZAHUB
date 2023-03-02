@@ -47,6 +47,7 @@ $('#orderModal').on('show.bs.modal', function (event) {
     modal.find('#service_type_ref_img').attr('src', (type == "delivery" ? "/imgs/delivery.png" : "/imgs/collection.png"));
     if (is_accepted == "true") {
         modal.find('#closeButton').show();
+        modal.find('#printButton').show();
         modal.find('#confirmButton').show();
         modal.find('#rejectButton').hide();
         modal.find('#acceptButton').hide();
@@ -54,6 +55,7 @@ $('#orderModal').on('show.bs.modal', function (event) {
     } else {
         modal.find('#closeButton').hide();
         modal.find('#confirmButton').hide();
+        modal.find('#printButton').hide();
         modal.find('#rejectButton').show();
         modal.find('#acceptButton').show();
         modal.find('#time_spin').show();
@@ -64,3 +66,20 @@ $('#orderModal').on('hidden.bs.modal', function (e) {
     var modal = $(this);
     modal.find('.order-detail-body').empty();
 })
+
+function printElement(elem) {
+    var domClone = elem.cloneNode(true);
+
+    var $printSection = document.getElementById("printSection");
+
+    if (!$printSection) {
+        var $printSection = document.createElement("div");
+        $printSection.id = "printSection";
+        $printSection.style = "width:400px";
+        document.body.appendChild($printSection);
+    }
+
+    $printSection.innerHTML = "";
+    $printSection.appendChild(domClone);
+    window.print();
+}

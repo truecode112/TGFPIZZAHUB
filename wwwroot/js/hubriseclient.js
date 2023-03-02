@@ -160,6 +160,11 @@ function changeDelivery(action) {
     modal.find('#delivery_time').text(expect_date.getHours() + ":" + expect_date.getMinutes());
 }
 
+function printOrder() {
+
+    printElement(document.getElementById("order-modal-body"));
+}
+
 function changeOrderStatus(status) {
     if (status != "confirmed")
         $("#savingModal").modal("show");

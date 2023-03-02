@@ -13,7 +13,7 @@
       <div class="modal-header">
         <h5 class="modal-title" id="orderModalLongTitle">Order Details</h5>
       </div>
-      <div class="modal-body order-modal-body order-detail-body">
+      <div class="modal-body order-modal-body order-detail-body" name="order-modal-body" id="order-modal-body">
         
       </div>
       <input type="hidden" name="confirmtime" id="confirmtime" value=""/>
@@ -36,6 +36,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="closeButton" onClick="closeModal()" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-dark" id="printButton" onclick="printOrder()">Print</button>
         <button type="button" class="btn btn-primary" id="confirmButton" onclick="changeOrderStatus('confirmed')">Confirm</button>
         <button type="button" class="btn btn-secondary" id="rejectButton" onClick="changeOrderStatus('rejected')" data-dismiss="modal">Reject</button>
         <button type="button" class="btn btn-primary" id="acceptButton" onclick="changeOrderStatus('accepted')">Accept</button>
@@ -54,14 +55,14 @@
     </div>
 </div>
 
-<div class="d-flex flex-row" style="width:100%">
-    <div style="width:100%">
+<div class="row w-100">
+    <div class="col-md-6 col-sm-12">
         <h4>New</h4>
         <div id="pendingorders" class="display-grid mt-1" name="pendingorders" style="display:grid;width:100%;grid-template-columns:repeat(1, 250px);grid-column-gap:15px;grid-row-gap:5px;">
         </div>
     </div>
 
-    <div style="width:100%">
+    <div class="col-md-6 col-sm-12">
         <h4>Accepted</h4>
         <div id="acceptedorders" class="display-grid" name="acceptedorders" style="display:grid;width:100%;grid-template-columns:repeat(1, 250px);grid-column-gap:15px;grid-row-gap:5px;">
         </div>
