@@ -68,6 +68,8 @@ connection.on("CurrentOrders", function (currentOrders) {
     
     try {
         //console.log(oldMessages);
+        document.getElementById("acceptedorders").innerHTML = "";
+        document.getElementById("pendingorders").innerHTML = "";
         var orderArray = JSON.parse(currentOrders);
         if (orderArray != null && orderArray != undefined) {
             orderArray.forEach(order => {
