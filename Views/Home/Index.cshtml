@@ -24,19 +24,19 @@
       <input type="hidden" name="serviceType" id="serviceType" value="" />
       <input type="hidden" name="isAccepted" id="isAccepted" value="" />
       <div class="mt-2 mb-2 justify-content-center" id="time_spin" style="display:flex;">
-            <button type="button" onClick="changeDelivery('minus')" class="p-0 btn btn-light" style="width:100px;border-color: cornflowerblue;color:#0000ff;background: whitesmoke;"><span>&#8211;</span><br/>10 MIN</button>
-            <div class="ml-4 mr-4 w-10 flex-column d-flex align-items-center justify-content-center">
+                <button type="button" onClick="changeDelivery('minus')" class="p-0 btn btn-secondary" style="width:100px;"><span>&#8211;</span><br />10 MIN</button>
+            <div class="ms-4 me-4 w-10 flex-column d-flex align-items-center justify-content-center">
                 <p class="card-title mt-0 mb-0 font-weight-bold" name="service_type" id="service_type"></p> 
                 <div class="d-flex align-items-center justify-content-center">
-                    <p class="card-title mt-0 mb-0 font-weight-bold mr-2" style="line-height: 2;" id="delivery_time" name="delivery_time"></p> 
+                    <p class="card-title mt-0 mb-0 font-weight-bold me-2" style="line-height: 2;" id="delivery_time" name="delivery_time"></p> 
                     <img width="28px" height="28px" id="service_type_ref_img" />
                 </div>
             </div>
-            <button type="button" onClick="changeDelivery('plus')" class="p-0 btn btn-light" style="width:100px;border-color: cornflowerblue;color:#0000ff;background: whitesmoke;"><span>&#43;</span><br />10 MIN</button>
+            <button type="button" onClick="changeDelivery('plus')" class="p-0 btn btn-secondary" style="width:100px;"><span>&#43;</span><br />10 MIN</button>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="closeButton" onClick="closeModal()" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-dark" id="printButton" onclick="printOrder()">Print</button>
+        <button type="button" class="btn btn-info" id="printButton" onclick="printOrder()">Print</button>
         <button type="button" class="btn btn-primary" id="confirmButton" onclick="changeOrderStatus('confirmed')">Confirm</button>
         <button type="button" class="btn btn-secondary" id="rejectButton" onClick="changeOrderStatus('rejected')" data-dismiss="modal">Reject</button>
         <button type="button" class="btn btn-primary" id="acceptButton" onclick="changeOrderStatus('accepted')">Accept</button>

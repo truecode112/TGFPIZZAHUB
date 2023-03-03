@@ -67,19 +67,62 @@ $('#orderModal').on('hidden.bs.modal', function (e) {
     modal.find('.order-detail-body').empty();
 })
 
-function printElement(elem) {
-    var domClone = elem.cloneNode(true);
+function getBase64Image(img) {
+    var img_src = img.src;
+    return img_src.replace(/^data:image\/(png|jpeg);base64,/, "");
+}
 
-    var $printSection = document.getElementById("printSection");
-
-    if (!$printSection) {
-        var $printSection = document.createElement("div");
-        $printSection.id = "printSection";
-        $printSection.style = "width:400px";
-        document.body.appendChild($printSection);
+function eachNode(rootNode, callback) {
+    if (!callback) {
+        const nodes = [];
+        eachNode(rootNode, (node) => {
+            nodes.push(node);
+        });
+        return nodes;
     }
 
-    $printSection.innerHTML = "";
-    $printSection.appendChild(domClone);
-    window.print();
+    if (callback(rootNode) === false) {
+        return false;
+    }
+
+    if (rootNode.hasChildNodes()) {
+        for (const node of rootNode.childNodes) {
+            if (eachNode(node, callback) === false) {
+                return;
+            }
+        }
+    }
+}
+
+function printElement(elem) {
+    var domClone = elem.cloneNode(true);
+    eachNode(domClone, function (node) {
+        if (node != undefined && node.style != undefined && node.style.color != undefined)
+            node.style.color = "black";
+    });
+
+    var opt = {
+        margin: 1,
+        filename: 'order.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'B5', orientation: 'portrait' }
+    };
+    var img = html2pdf().set(opt).from(domClone).outputImg().then(function (pdfobj) {
+        var base64 = getBase64Image(pdfobj);
+        $.ajax({
+            type: "POST",
+            url: 'http://127.0.0.1:9100/htbin/print_base64.py',
+            data: { d: base64 },
+            success: function (list_printers) {
+
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    }).catch(function (err) {
+        console.log(err);
+    });
+    //window.print();
 }
