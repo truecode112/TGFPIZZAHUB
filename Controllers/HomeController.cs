@@ -46,8 +46,8 @@ namespace TGFPIZZAHUB.Controllers
             return View("Index");
         }
 
-        [HttpPost("/hubrise_callback")]
-        public async Task<IActionResult> HubRiseCallback([FromBody] HubRiseModel model)
+        [HttpPost("/tgfpizza_callback")]
+        public async Task<IActionResult> TGFPIZZACallback([FromBody] HubRiseModel model)
         {
             var jsonString = JsonConvert.SerializeObject(model);
             //string prettyStr;

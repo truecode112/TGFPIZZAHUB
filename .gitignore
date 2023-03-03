@@ -1,1 +1,7 @@
 /TGFPIZZAHUB.csproj.user
+/.vs
+/bin/Debug/net7.0
+/obj
+/Properties/PublishProfiles
+/Orders
+/.gitignore
