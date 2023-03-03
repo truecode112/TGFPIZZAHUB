@@ -1,5 +1,6 @@
 ﻿using Hanssens.Net;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -11,6 +12,11 @@ namespace TGFPIZZAHUB.Hubs
 {
     public class ChatHub : Hub
     {
+        public async Task<string> PrintTicket(string orderNumber)
+        {
+            return "Success";
+        }
+
         public async Task SendData(string postData)
         {
             ChangeOrderStatusModel? orderData = JsonConvert.DeserializeObject<ChangeOrderStatusModel>(postData);

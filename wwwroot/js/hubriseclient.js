@@ -162,7 +162,11 @@ function changeDelivery(action) {
 
 function printOrder() {
 
-    printElement(document.getElementById("order-modal-body"));
+    //printElement(document.getElementById("order-modal-body"));
+    var order_id = $('#orderId').val();
+    connection.invoke('PrintTicket', order_id).catch(function (err) {
+        return console.error(err.toString());
+    });
 }
 
 function changeOrderStatus(status) {
