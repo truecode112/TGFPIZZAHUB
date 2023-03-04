@@ -8,6 +8,7 @@ builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
 });
+builder.Services.AddControllers().AddNewtonsoftJson();
 
 var app = builder.Build();
 

@@ -26,13 +26,13 @@ function processOrder(formattedData, rawData, isAccepted) {
             type = order.new_state.service_type_ref.split("-")[1].toLowerCase();
         }
 
-        var orderCard = `<summary class="card mt-2 flex-row" id="${order.order_id}" onClick="viewOrder(event, '${encoded}', '${order.order_id}', '${order.location_id}', '${expectTime}', '${order.new_state.service_type_ref}', '${order.new_state.service_type}')"> 
+        var orderCard = `<summary class="card mt-2 flex-row border border-3" id="${order.order_id}" onClick="viewOrder(event, '${encoded}', '${order.order_id}', '${order.location_id}', '${expectTime}', '${order.new_state.service_type_ref}', '${order.new_state.service_type}')"> 
             <div class="ms-2 w-10 flex-column d-flex align-items-center justify-content-center">
-                <img src="${company == "ubereat" ? "/imgs/ubereats.png" : ( company == "takeaway" ? "/imgs/takeaway.png" : "/imgs/justeat.png")}" width="48px" height="48px" />
+                <img src="/imgs/${company}.png" width="48px" height="48px" />
             </div>
             <div class="ms-2 me-3 w-10 flex-column d-flex align-items-center justify-content-center">
                 <p class="card-title mt-0 mb-0 font-weight-bold" >${expectTime.getHours()}:${expectTime.getMinutes()}</p> 
-                <img src="${type == "delivery" ? "/imgs/delivery.png" : "/imgs/collection.png"}" width="32px" height="32px" />
+                <img src="/imgs/${type}.png" width="32px" height="32px" />
             </div> 
             <div class=""> 
                 <h6 class="card-title mb-0 mt-1">${order.new_state.customer.address_1 == null || typeof order.new_state.customer.address_1 != "string" ? "No address" : order.new_state.customer.address_1} ${order.new_state.customer.address_2 == null ? "" : order.new_state.customer.address_2}</h6> 
