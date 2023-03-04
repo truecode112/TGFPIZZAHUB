@@ -47,14 +47,18 @@ namespace TGFPIZZAHUB.Controllers
         }
 
         [HttpPost("/tgfpizza_callback")]
-        public async Task<IActionResult> TGFPIZZACallback(string orderString)
+        public async Task<IActionResult> TGFPIZZACallback([FromBody] JObject orderJSONObj)
         {
-            var jsonString = orderString;
+            if (orderJSONObj == null)
+            {
+                return Ok("Parameter is null");
+            }
+            var jsonString = orderJSONObj.ToString();
 
             HubRiseModel? model = JsonConvert.DeserializeObject<HubRiseModel>(jsonString);
             if (model == null)
             {
-                return Error();
+                return Ok("Deserialize Hubrise Model failed");
             }
             //string prettyStr;
             //prettyStr = JToken.Parse(jsonString).ToString(Formatting.Indented);
