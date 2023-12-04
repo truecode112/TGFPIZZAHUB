@@ -76,3 +76,7 @@ textarea:focus, input:focus {
         top: 0;
     }
 }
+
+.cp {
+    cursor: pointer;
+}

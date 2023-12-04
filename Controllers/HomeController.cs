@@ -12,6 +12,7 @@ using TGFPIZZAHUB.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static TGFPIZZAHUB.Models.HubRiseModel;
 using System.IO;
+using RestSharp;
 
 namespace TGFPIZZAHUB.Controllers
 {
@@ -23,11 +24,13 @@ namespace TGFPIZZAHUB.Controllers
 
         LocalStorage localStorage = new LocalStorage();
 
-        public HomeController(ILogger<HomeController> logger, IHubContext<ChatHub> hubContext)
+        private readonly IConfiguration _config;
+
+        public HomeController(ILogger<HomeController> logger, IHubContext<ChatHub> hubContext, IConfiguration config)
         {
             _logger = logger;
             HubContext = hubContext;
-
+            _config = config;
         }
 
         /*public IActionResult Index(HubRiseModel model)
@@ -36,14 +39,116 @@ namespace TGFPIZZAHUB.Controllers
             return View(model);
         }*/
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            HomeModel model = new HomeModel();
+            var clientId = _config.GetSection("ClientID").Value;
+            model.ClientID = clientId;
+            var authCode = HttpContext.Session.GetString("code");
+            var accessToken = HttpContext.Session.GetString("accessToken");
+            if (!string.IsNullOrEmpty(authCode) && string.IsNullOrEmpty(accessToken) )
+            {
+                var baseUrl = string.Format("https://manager.hubrise.com/oauth2/v1/token");
+                var options = new RestClientOptions(baseUrl)
+                {
+                    RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true
+                };
+
+                var client = new RestClient(options);
+                if (client != null)
+                {
+                    var request = new RestRequest();
+                    request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.AddParameter("code", authCode);
+                    request.AddParameter("client_id", _config.GetSection("ClientID").Value);
+                    request.AddParameter("client_secret", _config.GetSection("ClientSecret").Value);
+
+                    RestResponse response = await client.PostAsync(request);
+                    if (response != null && response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var obj = JsonConvert.DeserializeObject<dynamic>(response.Content);
+                        if (obj != null)
+                        {
+                            accessToken = obj["access_token"];
+                            HttpContext.Session.SetString("accessToken", accessToken);
+                            string accountId = obj["account_id"];
+                            model.AccountId = (string)obj["account_id"];
+                            model.CatalogId = (string)obj["catalog_id"];
+                            model.LocationId = (string)obj["location_id"];
+                            model.AccountName = (string)obj["account_name"];
+                            model.LocationName = (string)obj["location_name"];
+                            model.CatalogName = (string)obj["catalog_name"];
+                            /*ViewData["account_id"] = obj["account_id"];
+                            ViewData["location_id"] = obj["location_id"];
+                            ViewData["catalog_id"] = obj["catalog_id"];
+                            ViewData["account_name"] = obj["account_name"];
+                            ViewData["location_name"] = obj["location_name"];
+                            ViewData["catalog_name"] = obj["catalog_name"];*/
+                        }
+                    }
+                }
+            } else if (!string.IsNullOrEmpty(accessToken))
+            {
+                var baseUrl = string.Format("https://api.hubrise.com/v1/location/catalogs");
+                var options = new RestClientOptions(baseUrl)
+                {
+                    RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true
+                };
+
+                var client = new RestClient(options);
+                var request = new RestRequest();
+                request.AddHeader("Access-Control-Allow-Origin", "*");
+                request.AddHeader("Content-Type", "application/json");
+                request.AddHeader("X-Access-Token", accessToken);
+                RestResponse response = await client.GetAsync(request);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    var obj = JsonConvert.DeserializeObject<dynamic>(response.Content);
+                    if (obj != null && obj[0] != null)
+                    {
+                        model.AccountId = (string)obj[0]["account_id"];
+                        model.CatalogId = (string)obj[0]["id"];
+                        model.CatalogName = (string)obj[0]["name"];
+                    }
+                }
+
+                baseUrl = string.Format("https://api.hubrise.com/v1/location");
+                options = new RestClientOptions(baseUrl)
+                {
+                    RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true
+                };
+
+                client = new RestClient(options);
+                request = new RestRequest();
+                request.AddHeader("Access-Control-Allow-Origin", "*");
+                request.AddHeader("Content-Type", "application/json");
+                request.AddHeader("X-Access-Token", accessToken);
+                response = await client.GetAsync(request);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    var obj = JsonConvert.DeserializeObject<dynamic>(response.Content);
+                    if (obj != null)
+                    {
+                        model.AccountName = (string)obj["account"]["name"];
+                        model.LocationName = (string)obj["name"];
+                        model.LocationId= (string)obj["id"];
+                    }
+                }
+            }
+            return View(model);
         }
 
         public IActionResult Privacy()
         {
             return View("Index");
+        }
+
+        public IActionResult Callback(string code)
+        {
+            HttpContext.Session.SetString("code", code);
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpPost("/tgfpizza_callback")]
@@ -501,9 +606,6 @@ namespace TGFPIZZAHUB.Controllers
                             1, model.NewStateObj.Deals.Name);
             }
 
-            // foreach(var deal in model.NewStateObj.Deals) {                
-            // }
-            
             formatted += string.Format("<hr>");
             formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div style=\"margin-left: 50px;\"><b>Total</b></div><div>{0}</div></div>", model.NewStateObj.Total);
             formatted += string.Format("<div style=\"display: flex; justify-content: space-between;\"><div>You have saved:</div><div>{0} GBP</div></div>", totalDiscount);
@@ -515,6 +617,13 @@ namespace TGFPIZZAHUB.Controllers
         public IActionResult Error()
         { 
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult Disconnect()
+        {
+            HttpContext.Session.Remove("code");
+            HttpContext.Session.Remove("accessToken");
+            return Json("OK");
         }
     }
 }
