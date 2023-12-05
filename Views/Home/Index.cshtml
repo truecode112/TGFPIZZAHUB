@@ -1,10 +1,45 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@model TGFPIZZAHUB.Models.HomeModel
+@{
     ViewData["Title"] = "Home Page";
+    string ClientID = Model.ClientID.ToString();
+    string accountId = Model.AccountId?.ToString();
+    string locationId = Model.LocationId?.ToString();
+    string catalogId = Model.CatalogId?.ToString();
+    string accountName = Model.AccountName?.ToString();
+    string locationName = Model.LocationName?.ToString();
+    string catalogName = Model.CatalogName?.ToString();
+
+    /*string accountId = ViewData["account_id"] == null ? null : ViewData["account_id"].ToString();
+    string locationId = ViewData["location_id"] == null ? null : ViewData["location_id"].ToString();
+    string catalogId = ViewData["catalog_id"] == null ? null : ViewData["catalog_id"].ToString();
+    string accountName = ViewData["account_name"] == null ? null : ViewData["account_name"].ToString();
+    string locationName = ViewData["location_name"] == null ? null : ViewData["location_name"].ToString();
+    string catalogName = ViewData["catalog_name"] == null ? null : ViewData["catalog_name"].ToString();*/
 }
 <br/>
+
 <div class="text-center">
     <h4>TGFPIZZAHUB</h4>
  </div>
+
+<div>
+    @if (string.IsNullOrEmpty(accountId))
+    {
+        <h6>Share data with other applications.</h6>
+        <button onclick="connectHubrise()">Connect to HubRise</button>
+    } else {
+        <h6>Connected to HubRise</h6>
+        <p>Location: @locationName - @locationId</p>
+        <p>Catalog: @catalogName - @catalogId</p>
+        <div class="d-flex flex-row">
+            <a target="_blank" href="https://hubrise.com"><u>Go to HubRise</u></a>
+            <p class="mx-2">-</p>
+            <p onclick="disconnect()"><u class="cp">Disconnect</u></p>
+        </div>
+    }
+</div>
 
 <div class="modal fade" id="orderModal"  role="dialog" aria-labelledby="orderModalTitle" aria-hidden="true" data-keyboard="false" data-backdrop="false">
   <div class="modal-dialog order-modal-dialog modal-dialog-centered" role="document">
@@ -68,6 +103,27 @@
     </div>
 </div>
 
+<script>
+    function connectHubrise() {
+        let clientId = "@ClientID";
+        const hostUrl = window.location.protocol + "//" + window.location.host;
+        var authUrl = "https://manager.hubrise.com/oauth2/v1/authorize?redirect_uri=" + hostUrl + "/Home/Callback&" + "client_id=" + clientId + "&scope=location[customer_list.read,orders.write,catalog.read]"
+        window.location.href = authUrl;
+    }
+
+    function disconnect() {
+        $.ajax({
+            url: '/Home/Disconnect',
+            type: 'POST',
+            success: function (res) {
+                window.location.href = "/Home/Index";
+            },
+            error: function(xhr) {
+
+            }
+        })
+    }
+</script>
 
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 <script src="~/js/hubriseclient.js"></script>
