@@ -137,6 +137,45 @@ namespace TGFPIZZAHUB.Controllers
                     }
                 }
             }
+
+            // Set callback
+            if (!string.IsNullOrEmpty(accessToken) && !Request.Host.Value.Contains("locahost"))
+            {
+                var baseUrl = string.Format("https://api.hubrise.com/v1/callback");
+                var options = new RestClientOptions(baseUrl)
+                {
+                    RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true
+                };
+
+                var client = new RestClient(options);
+                var request = new RestRequest();
+                request.AddHeader("Content-Type", "application/json");
+                request.AddHeader("X-Access-Token", accessToken);
+                JObject bodyObject = new JObject();
+                var callbackUrl = Request.Scheme + "://" + Request.Host.Value + "/tgfpizza_callback";
+                bodyObject.Add("url", callbackUrl);
+                var orderValue = _config.GetSection("events").GetSection("order").Get<string[]>();
+                var locationValue = _config.GetSection("events").GetSection("location").Get<string[]>();
+                JObject eventObj = new JObject();
+                if (orderValue != null)
+                    eventObj["order"] = new JArray(orderValue);
+                if (locationValue != null)
+                    eventObj["location"] = new JArray(locationValue);
+
+                if (eventObj != null)
+                {
+                    bodyObject.Add("events", eventObj);
+                    var bodyString = bodyObject.ToString();
+                    request.AddParameter("application/json", bodyString, ParameterType.RequestBody);
+                    request.RequestFormat = DataFormat.Json;
+                    RestResponse response = await client.PostAsync(request);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        Console.WriteLine("Callback is set successfully!");
+                    }
+                }
+            }
             return View(model);
         }
 
