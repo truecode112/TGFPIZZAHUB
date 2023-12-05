@@ -107,7 +107,8 @@
 <script>
     function connectHubrise() {
         let clientId = "@ClientID";
-        var authUrl = "https://manager.hubrise.com/oauth2/v1/authorize?redirect_uri=" + window.location.href + "Home/Callback&" + "client_id=" + clientId + "&scope=location[customer_list.read,orders.write,catalog.read]"
+        const hostUrl = window.location.protocol + "//" + window.location.host;
+        var authUrl = "https://manager.hubrise.com/oauth2/v1/authorize?redirect_uri=" + hostUrl + "/Home/Callback&" + "client_id=" + clientId + "&scope=location[customer_list.read,orders.write,catalog.read]"
         window.location.href = authUrl;
     }
 
